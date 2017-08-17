@@ -1,0 +1,131 @@
+description 'SPARK'
+
+ext {
+    javaVersion = JavaVersion.VERSION_1_8
+    meta = [
+        buildBy: System.getProperty('user.name'),
+        createdBy: "${System.getProperty('java.version')} (${System.getProperty('java.specification.vendor')})",
+    ]
+    scalaProjects = allprojects.findAll { Project child ->
+        ['src/main/scala', 'src/main/resources'].any { new File(child.projectDir, it).exists() }
+    }
+}
+
+apply plugin: 'idea'
+
+idea {
+    project {
+        jdkName = "${javaVersion}"
+        languageLevel = "${javaVersion}"
+        vcs = 'Git'
+    }
+    module {
+        name = project.name
+    }
+}
+
+configure(allprojects) {
+
+    defaultTasks 'build'
+    buildDir 'target'
+
+    apply plugin: 'scala'
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+}
+
+
+configure(scalaProjects) {
+    apply plugin: 'scala'
+
+    repositories {
+        mavenCentral()
+    }
+
+    configurations {
+        deploy
+        runtimeExtended
+    }
+
+    publishing {
+        publications {
+            mavenScala(MavenPublication) {
+                from components.java
+
+                artifact tasks.sourceJar
+
+                // This is workaround of known issue:
+                // https://discuss.gradle.org/t/maven-publish-plugin-generated-pom-making-dependency-scope-runtime/7494
+                pom.withXml {
+                    asNode().dependencies.'*'.findAll() {
+                        it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
+                            dep.name == it.artifactId.text()
+                        }
+                    }.each() {
+                        it.scope*.value = 'compile'
+                    }
+                }
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
+    }
+
+    task sourceJar(type: Jar) {
+        classifier 'sources'
+        from sourceSets.main.allSource
+    }
+    artifacts.archives sourceJar
+
+    jar.doFirst {
+        manifest {
+            attributes(
+                'Created-By': meta.createdBy,
+                'Built-By': meta.buildBy,
+
+                'Build-Timestamp': System.currentTimeMillis(),
+
+                'Implementation-Title': project.description,
+                'Implementation-Version': project.version,
+
+                'Specification-Title': project.description,
+                'Specification-Version': project.version,
+            )
+        }
+    }
+
+    task distTar(type: Tar, dependsOn: [jar]) {
+        from(configurations.runtime) {
+            into 'lib'
+            exclude 'scala-library-*.jar'
+            exclude 'scala-reflect-*.jar'
+        }
+
+        from(libsDir) {
+            into 'lib'
+            exclude '*-sources.jar'
+        }
+
+        classifier = 'bin'
+        extension = 'tar.gz'
+        compression = Compression.GZIP
+    }
+
+    artifacts {
+        archives distTar
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifact distTar
+            }
+        }
+    }
+
+}

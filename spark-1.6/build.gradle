@@ -1,0 +1,33 @@
+
+description 'SPARK :: 1.6'
+
+ext {
+    versions = [
+        'scalaLibrary' : '2.10.4',
+        'spark': '1.6.3',
+        'scalaLogging': '2.1.2',
+        'scopt': '3.5.0',
+        'ficus': '1.0.1',
+        'sparkAvro': '2.0.1',
+        'jackson': '2.4.4'
+    ]
+}
+
+dependencies {
+
+    compile "org.scala-lang:scala-library:${versions.scalaLibrary}"
+    compile "org.scala-lang:scala-compiler:${versions.scalaLibrary}"
+
+    compile "org.apache.spark:spark-core_2.10:$versions.spark"
+    compile "org.apache.spark:spark-sql_2.10:$versions.spark"
+    compile "com.databricks:spark-avro_2.10:$versions.sparkAvro"
+
+    compile "com.typesafe.scala-logging:scala-logging-slf4j_2.10:$versions.scalaLogging"
+    compile "com.github.scopt:scopt_2.10:$versions.scopt"
+    compile "net.ceedubs:ficus_2.10:$versions.ficus"
+
+}
+
+jar {
+    archiveName = "${project.name}.jar"
+}

@@ -1,0 +1,4 @@
+rootProject.name = 'spark'
+
+include 'spark-1.6'
+include 'spark-2.2'
