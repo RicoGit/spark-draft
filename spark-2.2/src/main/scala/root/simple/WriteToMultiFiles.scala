@@ -25,7 +25,7 @@ object WriteToMultiFiles {
     val spark =
       SparkSession.builder
         .appName("Simple Application")
-        .master("local")
+        .master("local[2]")
         .config(new SparkConf().set("spark.serializer", "org.apache.spark.serializer.KryoSerializer"))
         .getOrCreate()
 
@@ -35,7 +35,7 @@ object WriteToMultiFiles {
       Seq("cid1" -> Record("uid1", Seq("s1", "s2", "s3")), "cid2" -> Record("uid2", Seq("s2", "s3", "s4")))
     )
 
-    ds.repartition(2).foreachPartition(partition => writeLinesToLocalFs(partition, toLine))
+    ds.repartition(4).foreachPartition(partition => writeLinesToLocalFs(partition, toLine))
 
   }
 
@@ -69,7 +69,7 @@ object WriteToMultiFiles {
     }
   }
 
-  def toLine(record: Record): String = s"${record.uid}\t${record.sids.mkString(",")}\n"
+  private def toLine(record: Record): String = s"${record.uid}\t${record.sids.mkString(",")}\n"
 
 }
 

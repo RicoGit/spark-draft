@@ -7,13 +7,10 @@ import org.slf4j.LoggerFactory
 /** Base parent for all spark spark.job. */
 trait SimpleJob {
 
-  protected val jobName = this.getClass.getSimpleName.replace("$", "")
   protected val logger = Logger(LoggerFactory.getLogger(this.getClass.getName))
 
   def main(args: Array[String]) = {
-
     logger.info("Job starts")
-    // todo change
     val sc: SparkContext = createSparkContext
     try {
       doWork(sc)
