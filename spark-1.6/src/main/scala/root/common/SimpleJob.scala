@@ -1,20 +1,22 @@
-package spark.common
+package root.common
 
 import com.typesafe.scalalogging.slf4j.Logger
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 
-
 /** Base parent for all spark spark.job. */
-trait CommandLineJob {
+trait SimpleJob {
 
+  protected val jobName = this.getClass.getSimpleName.replace("$", "")
   protected val logger = Logger(LoggerFactory.getLogger(this.getClass.getName))
 
   def main(args: Array[String]) = {
-    logger.info(s"start with arguments: ${args.mkString(",")}")
+
+    logger.info("Job starts")
+    // todo change
     val sc: SparkContext = createSparkContext
     try {
-      doWork(sc, args)
+      doWork(sc)
     } finally {
       sc.stop()
     }
@@ -23,9 +25,9 @@ trait CommandLineJob {
   /**
    * Primary method. Override this method and put all logic here
    */
-  def doWork(sc: SparkContext, args: Array[String])
+  protected def doWork(sc: SparkContext)
 
-  def sparkConf = new SparkConf()
+  protected def sparkConf = new SparkConf()
 
   protected def createSparkContext = new SparkContext(sparkConf)
 

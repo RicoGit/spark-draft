@@ -1,8 +1,7 @@
-package spark
+package root
 
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.{SparkConf, SparkContext}
-
 
 /**
   * User: Constantine Solovev
@@ -23,7 +22,7 @@ object SparkSqlSimpleJob {
     val sc = new SparkContext(conf)
 
 
-    val sampleFile: String = getClass.getResource("/spark/sparkSqlSample.json").getPath
+    val sampleFile: String = getClass.getResource("/sparkSqlSample.json").getPath
 
     val sqlContext = new SQLContext(sc)
 
