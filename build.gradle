@@ -1,4 +1,4 @@
-description 'SPARK'
+description 'SPARK DRAFT'
 
 ext {
     javaVersion = JavaVersion.VERSION_1_8
