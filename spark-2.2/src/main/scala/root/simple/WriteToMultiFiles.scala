@@ -39,7 +39,7 @@ object WriteToMultiFiles {
 
   }
 
-  private def writeLinesToLocalFs[V](iterator: Iterator[(String, V)], toLine: V => String): Unit = {
+  def writeLinesToLocalFs[V](iterator: Iterator[(String, V)], toLine: V => String): Unit = {
 
     val writers = new mutable.HashMap[String, Writer]
     try {
