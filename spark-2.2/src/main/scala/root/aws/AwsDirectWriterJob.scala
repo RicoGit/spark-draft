@@ -18,7 +18,7 @@ import scala.collection.mutable
   */
 
 
-object AwsWriterJob extends SimpleJob {
+object AwsDirectWriterJob extends SimpleJob {
 
   private val JobName= "AwsWriterJob"
 
