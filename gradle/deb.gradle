@@ -1,0 +1,211 @@
+private groovy.lang.Closure replacer(Project project) {
+    def replacements = [
+            ['${project.build.finalName}', "${project.name}-${project.version}"],
+            ['${project.version}', project.version.toString()]
+    ];
+
+    { String line ->
+        replacements.inject(line) { res, item ->
+            res.replace(item[0], item[1])
+        }
+    }
+}
+
+subprojects {
+
+    ext.jarWithClasspath = { mainClass ->
+        jar {
+            manifest {
+                attributes(
+                        'Main-Class': mainClass,
+                        "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+                )
+            }
+        }
+    }
+
+    ext.packDeb = { String packName, String scriptName ->
+        project.ext.packName = packName
+        apply plugin: 'nebula.deb'
+
+        String nameOfPackage = "${packName}-${version}"
+        def snapshotIndex = nameOfPackage.indexOf('-SNAPSHOT')
+        if (snapshotIndex != -1) {
+            nameOfPackage = nameOfPackage.substring(0, snapshotIndex)
+        }
+
+        task copyPostInst(type: Copy) {
+            from 'src/assembly/dist/postinst.sh'
+            filter replacer(project)
+            into { 'build/debian' }
+            rename('postinst.sh', 'postinst')
+        }
+
+        task copyPreInst(type: Copy) {
+            from 'src/assembly/dist/preinst.sh'
+            filter replacer(project)
+            into { 'build/debian' }
+            rename('preinst.sh', 'preinst')
+        }
+
+
+        task deb(type: Deb) {
+            packageName nameOfPackage
+            // 'all' in fact, 'amd64' for interoperability with aplty
+            arch 'amd64'
+            priority 'extra'
+
+            into("/usr/lib/${packName}/${version}") {
+                into('lib') {
+                    from(jar)
+                    from(configurations.runtime)
+                }
+                into('conf') {
+                    from('conf')
+                }
+                from("src/assembly/dist/${scriptName}.conf") {
+                    fileMode 0774
+                }
+                from("src/assembly/dist/${scriptName}.sh") {
+                    filter replacer(project)
+                    fileMode 0774
+                }
+                from('src/assembly/dist/default.cfg') {
+                    filter replacer(project)
+                    fileMode 0774
+                    into 'conf'
+                }
+                into('data') {
+                    from('data')
+                }
+            }
+        }
+        deb.dependsOn(copyPostInst)
+        deb.dependsOn(copyPreInst)
+    }
+
+    ext.pack = { String packName, String scriptName ->
+        project.ext.packName = packName
+        apply plugin: 'nebula.deb'
+
+        String nameOfPackage = "${packName}-${version}"
+        def snapshotIndex = nameOfPackage.indexOf('-SNAPSHOT')
+        if (snapshotIndex != -1) {
+            nameOfPackage = nameOfPackage.substring(0, snapshotIndex)
+        }
+
+        task copyPostInst(type: Copy) {
+            from 'src/assembly/dist/postinst.sh'
+            filter replacer(project)
+            into { 'build/debian' }
+            rename('postinst.sh', 'postinst')
+        }
+
+        task copyPreInst(type: Copy) {
+            from 'src/assembly/dist/preinst.sh'
+            filter replacer(project)
+            into { 'build/debian' }
+            rename('preinst.sh', 'preinst')
+        }
+
+
+        task deb(type: Deb) {
+            packageName nameOfPackage
+            // 'all' in fact, 'amd64' for interoperability with aplty
+            arch 'amd64'
+            priority 'extra'
+
+            into("/usr/lib/${packName}/${version}") {
+                into('lib') {
+                    from(jar)
+                    from(configurations.runtime)
+                }
+                into('conf') {
+                    from('conf')
+                }
+                from("src/assembly/dist/${scriptName}.conf") {
+                    fileMode 0774
+                }
+                from("src/assembly/dist/${scriptName}.sh") {
+                    filter replacer(project)
+                    fileMode 0774
+                }
+                from('src/assembly/dist/default.cfg') {
+                    filter replacer(project)
+                    fileMode 0774
+                    into 'conf'
+                }
+                into('data') {
+                    from('data')
+                }
+            }
+        }
+        deb.dependsOn(copyPostInst)
+        deb.dependsOn(copyPreInst)
+
+
+
+        def projectWithTask = getProjectWithAfterReleaseBuildTask(project)
+        if (projectWithTask != null) {
+            projectWithTask.tasks.afterReleaseBuild.dependsOn(project.tasks.deb)
+        }
+
+        task zippedBundle(type: Zip) {
+            classifier 'bundle'
+            into(packName) {
+                into('lib') {
+                    from(jar)
+                    from(configurations.runtime)
+                }
+                into('conf') {
+                    from('conf')
+                }
+                from("src/assembly/dist/${scriptName}.sh") {
+                    filter replacer(project)
+                    fileMode 0774
+                }
+                from('src/assembly/dist/default.cfg') {
+                    filter replacer(project)
+                    fileMode 0774
+                    into 'conf'
+                }
+                into('data') {
+                    from('data')
+                }
+            }
+        }
+        task bundle(type: Copy) {
+            destinationDir = file('build/bundle')
+            into('lib') {
+                from(jar)
+                from(configurations.runtime)
+            }
+            into('conf') {
+                from('conf')
+            }
+            from("src/assembly/dist/${scriptName}.sh") {
+                filter replacer(project)
+                fileMode 0774
+            }
+            from('src/assembly/dist/default.cfg') {
+                filter replacer(project)
+                fileMode 0774
+                into 'conf'
+            }
+            into('data') {
+                from('data')
+            }
+        }
+        bundle.dependsOn(project.tasks.jar)
+        zippedBundle.dependsOn(project.tasks.jar)
+    }
+
+}
+
+static def getProjectWithAfterReleaseBuildTask(Project project) {
+    def candidate = project
+    while (candidate != null && candidate.tasks.findByName('afterReleaseBuild') == null) {
+        candidate = candidate.parent
+    }
+    candidate
+}
