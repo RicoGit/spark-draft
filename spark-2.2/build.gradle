@@ -24,6 +24,8 @@ dependencies {
     compile "com.esotericsoftware:kryo:${versions.kryo}"
 //    compile "com.databricks:spark-avro_2.11:$versions.sparkAvro"
 
+    compile "com.esotericsoftware:kryo:${versions.kryo}"
+
     compile "com.typesafe.scala-logging:scala-logging-slf4j_2.11:$versions.scalaLogging"
     compile "com.github.scopt:scopt_2.11:$versions.scopt"
     compile "net.ceedubs:ficus_2.11:$versions.ficus"
