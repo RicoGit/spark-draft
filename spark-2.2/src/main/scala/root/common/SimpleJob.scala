@@ -13,7 +13,7 @@ trait SimpleJob {
     logger.info("Job starts")
     val sc: SparkContext = createSparkContext
     try {
-      doWork(sc)
+      run(sc)
     } finally {
       sc.stop()
     }
@@ -22,7 +22,7 @@ trait SimpleJob {
   /**
    * Primary method. Override this method and put all logic here
    */
-  protected def doWork(sc: SparkContext)
+  protected def run(sc: SparkContext)
 
   protected def sparkConf = new SparkConf()
 

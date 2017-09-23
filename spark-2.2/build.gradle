@@ -4,7 +4,9 @@ description 'SPARK :: 2.2'
 ext {
     versions = [
         'awsJavaSdk' : '1.11.195',
+        'scala' : '2.11',
         'scalaLibrary' : '2.11.8',
+        'scalatest' : '2.2.5',
         'spark': '2.2.0',
         'scalaLogging': '2.1.2',
         'scopt': '3.6.0',
@@ -12,6 +14,7 @@ ext {
         'sparkAvro': '3.2.0',
         'jackson': '2.4.4',
         'hadoopAws': '2.7.0',
+        'hadoopMiniCluster': '2.7.0',
         'kryo': '4.0.0'
     ]
 }
@@ -21,8 +24,8 @@ dependencies {
     compile "org.scala-lang:scala-library:${versions.scalaLibrary}"
     compile "org.scala-lang:scala-compiler:${versions.scalaLibrary}"
 
-    compile "org.apache.spark:spark-core_2.11:$versions.spark"
-    compile "org.apache.spark:spark-sql_2.11:$versions.spark"
+    compile "org.apache.spark:spark-core_${versions.scala}:$versions.spark"
+    compile "org.apache.spark:spark-sql_${versions.scala}:$versions.spark"
     compile "com.esotericsoftware:kryo:${versions.kryo}"
     
     /* aws */
@@ -33,9 +36,15 @@ dependencies {
 
     compile "com.esotericsoftware:kryo:${versions.kryo}"
 
-    compile "com.typesafe.scala-logging:scala-logging-slf4j_2.11:$versions.scalaLogging"
-    compile "com.github.scopt:scopt_2.11:$versions.scopt"
-    compile "net.ceedubs:ficus_2.11:$versions.ficus"
+    compile "com.typesafe.scala-logging:scala-logging-slf4j_${versions.scala}:$versions.scalaLogging"
+    compile "com.github.scopt:scopt_${versions.scala}:$versions.scopt"
+    compile "net.ceedubs:ficus_${versions.scala}:$versions.ficus"
+
+    // tests
+
+    testCompile "org.scalatest:scalatest_${versions.scala}:${versions.scalatest}"
+    // MINICluster, that containts MiniDFSCluster implementation
+    testCompile "org.apache.hadoop:hadoop-minicluster:${versions.hadoopMiniCluster}"
 
 }
 

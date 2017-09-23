@@ -33,7 +33,7 @@ object AwsViaHdfsWriterJob extends CommandLineJob {
     .set("hadoop.mapreduce.output.basename", "yourPrefix")
     .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
-  override protected def doWork(sc: SparkContext, args: Array[String]): Unit = {
+  override protected def run(sc: SparkContext, args: Array[String]): Unit = {
 
     val spark = SparkSession.builder().config(sparkConf).getOrCreate()
     import spark.implicits._

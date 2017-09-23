@@ -13,7 +13,7 @@ trait CommandLineJob {
     logger.info(s"Job start with arguments: ${args.mkString(",")}")
     val sc: SparkContext = createSparkContext
     try {
-      doWork(sc, args)
+      run(sc, args)
     } finally {
       sc.stop()
     }
@@ -22,7 +22,7 @@ trait CommandLineJob {
   /**
    * Primary method. Override this method and put all logic here
    */
-  protected def doWork(sc: SparkContext, args: Array[String])
+  protected def run(sc: SparkContext, args: Array[String])
 
   protected def sparkConf = new SparkConf()
 

@@ -28,7 +28,7 @@ object AwsDirectWriterJob extends SimpleJob {
     .set("spark.ui.enabled", "false")
     .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
-  override protected def doWork(sc: SparkContext): Unit = {
+  override protected def run(sc: SparkContext): Unit = {
 
     val spark = SparkSession.builder().config(sparkConf).getOrCreate()
     import spark.implicits._
