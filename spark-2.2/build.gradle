@@ -3,6 +3,7 @@ description 'SPARK :: 2.2'
 
 ext {
     versions = [
+        'awsJavaSdk' : '1.11.195',
         'scalaLibrary' : '2.11.8',
         'spark': '2.2.0',
         'scalaLogging': '2.1.2',
@@ -10,6 +11,7 @@ ext {
         'ficus': '1.1.2',
         'sparkAvro': '3.2.0',
         'jackson': '2.4.4',
+        'hadoopAws': '2.7.0',
         'kryo': '4.0.0'
     ]
 }
@@ -22,7 +24,12 @@ dependencies {
     compile "org.apache.spark:spark-core_2.11:$versions.spark"
     compile "org.apache.spark:spark-sql_2.11:$versions.spark"
     compile "com.esotericsoftware:kryo:${versions.kryo}"
-//    compile "com.databricks:spark-avro_2.11:$versions.sparkAvro"
+    
+    /* aws */
+    compile "org.apache.hadoop:hadoop-aws:${versions.hadoopAws}"
+    compile "com.amazonaws:aws-java-sdk-core:${versions.awsJavaSdk}"
+    compile "com.amazonaws:aws-java-sdk-s3:${versions.awsJavaSdk}"
+
 
     compile "com.esotericsoftware:kryo:${versions.kryo}"
 
